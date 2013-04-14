@@ -605,8 +605,10 @@ local function ParseLua(src)
 		--arg list
 		local argList = {}
 		local isVarArg = false
+        local expectsMore = false
 		while not tok:ConsumeSymbol(')') do
 			if tok:Is('Ident') then
+                expectsMore = false
 				local arg = funcScope:CreateLocal(tok:Get().Data)
 				argList[#argList+1] = arg
 				if not tok:ConsumeSymbol(',') then
@@ -615,8 +617,11 @@ local function ParseLua(src)
 					else
 						return false, GenerateError("`)` expected.")
 					end
+                else
+                    expectsMore = true
 				end
 			elseif tok:ConsumeSymbol('...') then
+                expectsMore = false
 				isVarArg = true
 				if not tok:ConsumeSymbol(')') then
 					return false, GenerateError("`...` must be the last argument of a function.")
@@ -626,6 +631,10 @@ local function ParseLua(src)
 				return false, GenerateError("Argument name or `...` expected")
 			end
 		end
+        
+        if expectsMore then
+            return false, GenerateError("Argument name or '...' expected")
+        end
 
 		--body
 		local st, body = ParseStatementList(funcScope)
@@ -1324,12 +1333,30 @@ local function ParseLua(src)
 		--
 		--local stats = {}
 		--
+        local hadReturn = false
+        --local firstStmt = true
 		while not statListCloseKeywords[tok:Peek().Data] and not tok:IsEof() do
+            --firstStmt = false
+            tok:Save()
 			local st, nodeStatement = ParseStatement(nodeStatlist.Scope)
 			if not st then return false, nodeStatement end
 			--stats[#stats+1] = nodeStatement
             nodeStatlist.Body[#nodeStatlist.Body + 1] = nodeStatement
+            
+            if hadReturn and nodeStatement.AstType == 'ReturnStatement' then
+                tok:Restore() -- hacks. probably not the best
+                return false, GenerateError("ReturnStatement not allowed, only one return per block")
+            end
+            if nodeStatement.AstType == 'ReturnStatement' then
+                -- allow only one return statement to be parsed
+                hadReturn = true
+            end
 		end
+        
+        --if firstStmt then
+        --    return false, GenerateError("<eof> expected")
+        --end
+        
 		--
 		--nodeStatlist.Body = stats
 		return true, nodeStatlist
