@@ -543,6 +543,7 @@ for w in io.lines("tmp") do
             print("Should fail: true. Did fail: " .. tostring(not success))
             --print("Message: " .. ast)
             print("Line: " .. w)
+            print""
         else
             --print("Suceeded!")
         end
@@ -552,6 +553,7 @@ for w in io.lines("tmp") do
             print("Should fail: false. Did fail: " .. tostring(not success))
             print("Message: " .. ast)
             print("Line: " .. w)
+            print""
         else
             --print("Suceeded!")
         end

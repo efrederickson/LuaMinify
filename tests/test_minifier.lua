@@ -550,6 +550,7 @@ for w in io.lines("tmp") do
             print("ERROR PARSING LINE:")
             print("Should fail: false. Did fail: " .. tostring(not success))
             print("Line: " .. w)
+            print""
         else
             success, ast = Format_Mini(ast)
             --print(success, ast)
@@ -557,6 +558,7 @@ for w in io.lines("tmp") do
                 print("ERROR MINIFYING LINE:")
                 print("Message: " .. ast)
                 print("Line: " .. w)
+                print""
             end
             local success_ = success
             success, ast = loadstring(success)
@@ -564,6 +566,7 @@ for w in io.lines("tmp") do
                 print("ERROR PARSING MINIFIED LINE:")
                 print("Message: " .. ast)
                 print("Line: " .. success_)
+                print""
             end
             --print("Suceeded!")
         end

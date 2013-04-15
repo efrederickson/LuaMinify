@@ -1334,9 +1334,7 @@ local function ParseLua(src)
 		--local stats = {}
 		--
         local hadReturn = false
-        --local firstStmt = true
 		while not statListCloseKeywords[tok:Peek().Data] and not tok:IsEof() do
-            --firstStmt = false
             tok:Save()
 			local st, nodeStatement = ParseStatement(nodeStatlist.Scope)
 			if not st then return false, nodeStatement end
@@ -1345,17 +1343,13 @@ local function ParseLua(src)
             
             if hadReturn and nodeStatement.AstType == 'ReturnStatement' then
                 tok:Restore() -- hacks. probably not the best
-                return false, GenerateError("ReturnStatement not allowed, only one return per block")
+                return false, GenerateError("return not allowed, only one return per block")
             end
             if nodeStatement.AstType == 'ReturnStatement' then
                 -- allow only one return statement to be parsed
                 hadReturn = true
             end
 		end
-        
-        --if firstStmt then
-        --    return false, GenerateError("<eof> expected")
-        --end
         
 		--
 		--nodeStatlist.Body = stats
